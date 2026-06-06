@@ -9,9 +9,9 @@ Collabstr's own design tokens. Built in about an hour.
 
 ## Live demo
 
-- **App:** <!-- LIVE_URL --> _deploying…_ (`https://collabstr-brief-generator.onrender.com`)
+- **App:** <!-- LIVE_URL --> **https://collabstr-brief-generator-production.up.railway.app**
 - **Loom (< 1 min):** <!-- LOOM_URL --> _coming soon_
-- **Styleguide:** `/styleguide` — living design-system reference
+- **Styleguide:** [`/styleguide`](https://collabstr-brief-generator-production.up.railway.app/styleguide) — living design-system reference
 
 ## Quickstart
 
