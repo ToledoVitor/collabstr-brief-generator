@@ -1,0 +1,17 @@
+/* Base — reset, document defaults, layout primitives. No components here. */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: var(--leading);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout primitives */
+.wrap { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-5); }
+.page { padding-top: 44px; padding-bottom: 64px; }
+.grid { display: grid; gap: var(--space-5); }

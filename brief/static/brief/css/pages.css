@@ -1,0 +1,51 @@
+/* Page/feature styles — composition specific to the Brief Generator screen.
+   Generic, reusable bits live in components.css. */
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.hero { text-align: center; margin-bottom: var(--space-6); }
+.hero__title { font-size: var(--text-2xl); font-weight: var(--weight-bold); letter-spacing: -.03em; margin: 0 0 var(--space-2); }
+.hero__sub { color: var(--ink-soft); font-size: var(--text-md); margin: 0 auto; max-width: 520px; }
+
+/* ── Brief form spacing ───────────────────────────────────────────────────── */
+#submit-btn { margin-top: var(--space-1); }
+#error { margin-top: var(--space-3); }
+
+/* ── Results panel ────────────────────────────────────────────────────────── */
+.results {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow);
+}
+.results__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.results__title { font-size: var(--text-lg); font-weight: var(--weight-bold); letter-spacing: -.02em; margin: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: 22px; }
+
+/* content blocks within the results panel */
+.block { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 18px; }
+.block:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.block__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.block__head h3 { font-size: var(--text-sm); font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: .06em; color: var(--periwinkle); margin: 0; }
+.hint { font-size: var(--text-xs); color: var(--ink-soft); }
+#brief-text { font-size: 15.5px; line-height: 1.6; }
+
+/* ── Angles ───────────────────────────────────────────────────────────────── */
+.angles { display: grid; gap: var(--space-3); }
+.angle {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 14px 16px; position: relative;
+}
+.angle__title { font-weight: var(--weight-bold); font-size: 15px; margin: 0 0 4px; padding-right: 54px; }
+.angle__desc { color: var(--ink-soft); font-size: var(--text-base); margin: 0; }
+.angle .copy { position: absolute; top: 11px; right: 11px; }
+
+/* ── Criteria ─────────────────────────────────────────────────────────────── */
+.criteria { list-style: none; padding: 0; margin: 0; display: grid; gap: 9px; }
+.criteria li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; }
+.criteria li::before {
+  content: "✓"; color: var(--ok); font-weight: 800; line-height: 1.45;
+  background: var(--ok-bg); border-radius: 6px; min-width: 22px; height: 22px;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .hero__title { font-size: 28px; }
+}

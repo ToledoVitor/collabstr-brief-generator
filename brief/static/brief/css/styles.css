@@ -1,0 +1,6 @@
+/* Entry point — import order matters: tokens → base → components → pages.
+   Add new component files here; keep tokens.css the single source of truth. */
+@import "tokens.css";
+@import "base.css";
+@import "components.css";
+@import "pages.css";

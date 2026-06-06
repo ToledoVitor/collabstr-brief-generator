@@ -1,0 +1,116 @@
+/* ───────────────────────────────────────────────────────────────────────────
+   Components — reusable, variant-driven. Used across pages.
+   Convention: .block is the base, .block--variant is a modifier.
+   All values come from tokens.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Topbar + brand ───────────────────────────────────────────────────────── */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar__inner { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+.brandmark {
+  font-weight: var(--weight-bold); font-size: 23px; letter-spacing: -.02em;
+  color: var(--ink); text-decoration: none;
+}
+.brandmark__dot {
+  background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Pills / tags ─────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center;
+  font-size: var(--text-xs); font-weight: var(--weight-semibold);
+  padding: 5px 12px; border-radius: var(--radius-pill); letter-spacing: .01em;
+}
+.pill--ghost   { color: #fff; background: var(--gradient); }
+.pill--soft    { color: var(--purple); background: rgba(255, 137, 155, .14); }
+.pill--neutral { color: var(--ink-soft); background: var(--surface-2); border: 1px solid var(--line); }
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow);
+}
+
+/* ── Form fields ──────────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: var(--space-4); }
+.field label { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--ink); }
+.field-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+
+.input, input[type="text"], select {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 11px 13px; width: 100%; transition: border-color .15s, box-shadow .15s;
+  appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2397a3c5' d='M6 8 0 2l1.4-1.4L6 5.2 10.6.6 12 2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
+}
+.input:focus, input[type="text"]:focus, select:focus {
+  outline: none; border-color: var(--pink); box-shadow: var(--ring);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+/* Base mirrors Collabstr's .btn: block-capable, weight 600, borderless, r8, hover opacity. */
+.btn {
+  font: inherit; font-weight: var(--weight-semibold); cursor: pointer; border: none;
+  border-radius: var(--radius); padding: 12px 18px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  transition: opacity .3s, background .15s; text-align: center;
+}
+.btn:active { transform: translateY(1px); }
+.btn--block { width: 100%; }
+.btn--primary { background: var(--gradient); color: #fff; box-shadow: var(--shadow); }
+.btn--primary:hover { opacity: .85; }
+.btn--outline { background: transparent; color: var(--pink-strong); border: 1px solid var(--pink); }
+.btn--outline:hover { background: rgba(255, 137, 155, .1); }
+.btn--ghost { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.btn--ghost:hover { opacity: .8; }
+.btn--sm { padding: 8px 14px; font-size: var(--text-sm); }
+.btn:disabled, .btn.is-disabled { opacity: .5; cursor: not-allowed; }
+
+/* spinner (inside loading buttons) */
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, .5); border-top-color: #fff;
+  animation: spin .7s linear infinite; display: none;
+}
+.is-loading .spinner { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Banners ──────────────────────────────────────────────────────────────── */
+.banner { padding: 11px 14px; border-radius: var(--radius); font-size: var(--text-base); }
+.banner--error   { background: var(--danger-bg); color: var(--danger); }
+.banner--success { background: var(--ok-bg); color: var(--ok); }
+.banner--info    { background: var(--info-bg); color: var(--info); }
+
+/* ── Chips (compact metadata) ─────────────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius-pill); padding: 5px 12px; font-size: 12.5px; color: var(--ink-soft);
+}
+.chip b { color: var(--ink); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+.chip--accent { background: rgba(255, 137, 155, .14); border-color: transparent; color: var(--purple); font-weight: var(--weight-semibold); }
+
+/* ── Copy button (inline action) ──────────────────────────────────────────── */
+.copy {
+  font: inherit; font-size: 12.5px; font-weight: var(--weight-semibold); cursor: pointer;
+  background: transparent; color: var(--pink-strong); border: none;
+  border-radius: 6px; padding: 4px 10px; transition: background .15s;
+}
+.copy:hover { background: rgba(255, 137, 155, .14); }
+.copy.is-done { color: var(--ok); }
+
+/* ── Editable text ────────────────────────────────────────────────────────── */
+.editable { border-radius: var(--radius); padding: 4px 6px; margin: -4px -6px; transition: background .12s; }
+.editable:hover { background: var(--surface-2); }
+.editable:focus { outline: none; background: var(--surface-2); box-shadow: 0 0 0 2px rgba(255, 137, 155, .35); }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.foot { text-align: center; color: var(--periwinkle); font-size: var(--text-sm); margin-top: var(--space-8); }
+
+@media (max-width: 560px) {
+  .field-row { grid-template-columns: 1fr; }
+}

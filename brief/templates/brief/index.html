@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AI Brief Generator · Collabstr{% endblock %}
+{% block description %}Turn four quick inputs into a ready-to-send campaign brief.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero__title">AI Brief Generator</h1>
+  <p class="hero__sub">Turn four quick inputs into a ready-to-send campaign brief for your next creator collab.</p>
+</section>
+
+<div class="grid">
+  <!-- Input card -->
+  <section class="card">
+    <form id="brief-form" novalidate>
+      {% include "components/field.html" with id="brand" label="Brand name" type="text" placeholder="e.g. Aera Skincare" required=True %}
+
+      <div class="field-row">
+        {% include "components/field.html" with id="platform" label="Platform" type="select" options=platforms %}
+        {% include "components/field.html" with id="goal" label="Goal" type="select" options=goals %}
+        {% include "components/field.html" with id="tone" label="Tone" type="select" options=tones %}
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn--primary btn--block">
+        <span class="btn__label">Generate brief</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+    </form>
+
+    <div id="error" class="banner banner--error" hidden></div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="results" hidden aria-live="polite">
+    <div class="results__head">
+      <h2 class="results__title">Campaign brief</h2>
+      <div class="results__actions">
+        <button type="button" id="regenerate-btn" class="btn btn--ghost btn--sm">Regenerate</button>
+      </div>
+    </div>
+
+    <div id="telemetry" class="chips"></div>
+
+    <article class="block">
+      <div class="block__head">
+        <h3>Brief</h3>
+        <button type="button" class="copy" data-copy-target="#brief-text">Copy</button>
+      </div>
+      <p id="brief-text" class="editable" contenteditable="true"></p>
+    </article>
+
+    <article class="block">
+      <div class="block__head">
+        <h3>Creative angles</h3>
+        <span class="hint">Tap any text to edit</span>
+      </div>
+      <div id="angles" class="angles"></div>
+    </article>
+
+    <article class="block">
+      <div class="block__head"><h3>Success criteria</h3></div>
+      <ul id="criteria" class="criteria"></ul>
+    </article>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="{% static 'brief/js/app.js' %}"></script>
+{% endblock %}

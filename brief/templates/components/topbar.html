@@ -1,0 +1,7 @@
+{% comment %}Topbar. Params: tag (right-side pill label).{% endcomment %}
+<header class="topbar">
+  <div class="wrap topbar__inner">
+    <a class="brandmark" href="/">collabstr<span class="brandmark__dot">.</span></a>
+    <span class="pill pill--ghost">{{ tag|default:"AI Studio" }}</span>
+  </div>
+</header>

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Design System · Collabstr{% endblock %}
+{% block description %}Tokens and components shared across Collabstr AI tools.{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* styleguide-only layout helpers (kept out of the component library) */
+  .sg-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .sg-sw { font-size: 12px; color: var(--ink-soft); }
+  .sg-sw span { display: block; height: 52px; border-radius: var(--radius); border: 1px solid var(--line); margin-bottom: 6px; }
+  .sg-card-title { margin: 0 0 16px; font-size: var(--text-sm); font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: .06em; color: var(--periwinkle); }
+  .sg-type > * { margin: 0 0 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1 class="hero__title">Design System</h1>
+  <p class="hero__sub">Tokens + components shared across Collabstr AI tools. Edit once in <code>tokens.css</code>; everything updates.</p>
+</section>
+
+<div class="grid">
+  <!-- Colors -->
+  <section class="card">
+    <p class="sg-card-title">Colors</p>
+    <div class="sg-swatches">
+      <div class="sg-sw"><span style="background:var(--gradient)"></span>--gradient</div>
+      <div class="sg-sw"><span style="background:var(--pink)"></span>--pink #FF899B</div>
+      <div class="sg-sw"><span style="background:var(--purple)"></span>--purple #B32DC2</div>
+      <div class="sg-sw"><span style="background:var(--ink)"></span>--ink #222</div>
+      <div class="sg-sw"><span style="background:var(--ink-soft)"></span>--ink-soft</div>
+      <div class="sg-sw"><span style="background:var(--periwinkle)"></span>--periwinkle</div>
+      <div class="sg-sw"><span style="background:var(--ok-bg)"></span>--ok-bg</div>
+      <div class="sg-sw"><span style="background:var(--danger-bg)"></span>--danger-bg</div>
+      <div class="sg-sw"><span style="background:var(--info-bg)"></span>--info-bg</div>
+      <div class="sg-sw"><span style="background:var(--surface-2)"></span>--surface-2</div>
+    </div>
+  </section>
+
+  <!-- Typography -->
+  <section class="card sg-type">
+    <p class="sg-card-title">Typography · Inter</p>
+    <h1 class="hero__title">Aa — Display 34</h1>
+    <h2 class="results__title">Aa — Title 20</h2>
+    <p style="font-size:var(--text-md)">Body 16 — the quick brown fox jumps over the lazy dog.</p>
+    <p style="font-size:var(--text-base);color:var(--ink-soft)">Small 14 muted — secondary copy.</p>
+  </section>
+
+  <!-- Buttons -->
+  <section class="card">
+    <p class="sg-card-title">Buttons</p>
+    <div class="sg-row">
+      <button class="btn btn--primary">Primary</button>
+      <button class="btn btn--outline">Outline</button>
+      <button class="btn btn--ghost">Ghost</button>
+      <button class="btn btn--primary btn--sm">Small</button>
+      <button class="btn btn--primary" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <!-- Pills + chips -->
+  <section class="card">
+    <p class="sg-card-title">Pills &amp; chips</p>
+    <div class="sg-row" style="margin-bottom:14px">
+      <span class="pill pill--ghost">Gradient</span>
+      <span class="pill pill--soft">Soft</span>
+      <span class="pill pill--neutral">Neutral</span>
+    </div>
+    <div class="sg-row">
+      <span class="chip">⚡ <b>842</b> ms</span>
+      <span class="chip chip--accent">anthropic · claude-haiku-4-5</span>
+      <span class="chip">💵 <b>$0.00072</b></span>
+    </div>
+  </section>
+
+  <!-- Banners -->
+  <section class="card">
+    <p class="sg-card-title">Banners</p>
+    <div class="banner banner--error" style="margin-bottom:10px">Error — brand name failed the content filter.</div>
+    <div class="banner banner--success" style="margin-bottom:10px">Success — brief generated.</div>
+    <div class="banner banner--info">Info — using the offline demo provider.</div>
+  </section>
+
+  <!-- Form fields -->
+  <section class="card">
+    <p class="sg-card-title">Form fields</p>
+    {% include "components/field.html" with id="sg-brand" label="Brand name" type="text" placeholder="e.g. Aera Skincare" %}
+    {% include "components/field.html" with id="sg-platform" label="Platform" type="select" options=platforms %}
+  </section>
+</div>
+{% endblock %}

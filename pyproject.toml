@@ -1,0 +1,31 @@
+[project]
+name = "collabstr-brief-generator"
+version = "0.1.0"
+description = "AI Brief Generator — Django + jQuery campaign brief tool for Collabstr."
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=5.0,<5.2",
+    "pydantic>=2,<3",
+    "openai>=1.40",
+    "anthropic>=0.34",
+    "python-dotenv>=1.0",
+    "whitenoise>=6",
+    "gunicorn>=21",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6",
+    "pre-commit>=4",
+]
+
+[tool.uv]
+# This is an application, not an installable package — don't try to build it.
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["I"]  # import sorting

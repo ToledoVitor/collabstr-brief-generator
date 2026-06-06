@@ -1,0 +1,76 @@
+# Pre-commit hooks for the AI Brief Generator.
+#
+# One-time setup (this repo is not yet a git repo — init first if needed):
+#   git init                         # only if .git doesn't exist yet
+#   uv add --dev pre-commit          # already in pyproject dev deps
+#   uv run pre-commit install        # wire the git pre-commit hook
+#
+# Run against everything on demand:
+#   uv run pre-commit run --all-files
+#
+# Tool versions for the Python checks come from uv.lock (single source of
+# truth) via `uv run`, so they never drift from `make lint` / `make test`.
+default_language_version:
+  python: python3.12
+
+repos:
+  # --- Overall code hygiene (generic, no project deps needed) ---------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: debug-statements   # catches stray pdb/breakpoint() before commit
+
+  # --- Project checks: ruff lint+format, Django, tests (all via uv) ---------
+  - repo: local
+    hooks:
+      # Lint files (matches `make lint`, with autofix).
+      - id: ruff-check
+        name: ruff lint (autofix)
+        entry: uv run ruff check --fix
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      # Format files (matches `make fmt`).
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      # Django system checks.
+      - id: django-check
+        name: django check
+        entry: uv run python manage.py check --settings=briefgen.settings_test
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      # Checking Django migrations: fail if models drift from migration files.
+      - id: django-makemigrations-check
+        name: django makemigrations --check
+        entry: uv run python manage.py makemigrations --check --dry-run --settings=briefgen.settings_test
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      # Run the test suite (offline, fake provider, no API key — matches `make
+      # test`). Tests on every commit can get slow; move this hook's `stages:`
+      # to [pre-push] if you'd rather gate on push than on commit.
+      - id: django-tests
+        name: django test suite (offline)
+        entry: uv run python manage.py test --settings=briefgen.settings_test
+        language: system
+        pass_filenames: false
+        always_run: true

@@ -1,0 +1,24 @@
+{% comment %}
+  Form field component.
+  Params:
+    id          input id (also the name unless `name` given)
+    label       visible label text
+    type        "text" (default) or "select"
+    name        optional, defaults to id
+    placeholder text inputs only
+    maxlength   text inputs, default 60
+    required    truthy to add the required attribute
+    options     select only — iterable of option values
+{% endcomment %}
+<div class="field">
+  <label for="{{ id }}">{{ label }}</label>
+  {% if type == "select" %}
+    <select id="{{ id }}" name="{{ name|default:id }}">
+      {% for opt in options %}<option value="{{ opt }}">{{ opt }}</option>{% endfor %}
+    </select>
+  {% else %}
+    <input type="text" id="{{ id }}" name="{{ name|default:id }}"
+           placeholder="{{ placeholder }}" maxlength="{{ maxlength|default:60 }}"
+           autocomplete="off"{% if required %} required{% endif %} />
+  {% endif %}
+</div>
