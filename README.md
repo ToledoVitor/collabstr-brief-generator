@@ -76,6 +76,16 @@ pink `#FF899B` + the signature pink→purple gradient · 8px radius).
 
 ## Deploy
 
-`Dockerfile` + `render.yaml` included (uv-based image). Defaults to the keyless
-`fake` provider so the live page works out of the box; set a provider + key to use
-a real model.
+`Dockerfile` + `render.yaml` included (uv-based image; migrate + gunicorn + whitenoise).
+
+On [Render](https://render.com): **New → Blueprint →** pick this repo **→ Apply**.
+The blueprint is set up for a real **OpenAI** demo, so Render prompts for two
+`sync: false` values at apply time:
+
+- `OPENAI_API_KEY` — your key (kept out of git)
+- `DJANGO_CSRF_TRUSTED_ORIGINS` — set to the full URL after the first deploy,
+  e.g. `https://collabstr-brief-generator.onrender.com`
+
+For a **keyless** demo instead, set `LLM_PROVIDER=fake` in the dashboard — the
+page then runs with deterministic sample output and no key. Any Docker host
+(Fly.io, Railway, Cloud Run) works the same way.

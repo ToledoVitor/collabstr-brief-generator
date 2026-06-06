@@ -17,9 +17,10 @@ RUN uv sync --frozen --no-dev
 COPY . .
 
 # Collect static at build time (whitenoise serves them in production).
-RUN uv run python manage.py collectstatic --noinput
+# --no-dev keeps the runtime image free of dev tooling (ruff, pre-commit).
+RUN uv run --no-dev python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
 # Migrate (creates the SQLite cost ledger), then serve with gunicorn.
-CMD ["sh", "-c", "uv run python manage.py migrate --noinput && uv run gunicorn briefgen.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2"]
+CMD ["sh", "-c", "uv run --no-dev python manage.py migrate --noinput && uv run --no-dev gunicorn briefgen.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2"]
