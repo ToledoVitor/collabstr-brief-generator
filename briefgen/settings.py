@@ -35,6 +35,16 @@ if not DEBUG and (not SECRET_KEY or SECRET_KEY == _DEV_SECRET):
 # Host allowlist. No insecure '*' default: dev falls back to localhost, prod must
 # set real hosts so a missing value fails closed instead of disabling Host checks.
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+# PaaS platforms inject the public domain at runtime — trust it automatically so
+# the host allowlist (and CSRF below) work without hand-copying the URL.
+# Railway: RAILWAY_PUBLIC_DOMAIN. Render: RENDER_EXTERNAL_HOSTNAME.
+_PAAS_HOST = (
+    os.getenv("RAILWAY_PUBLIC_DOMAIN") or os.getenv("RENDER_EXTERNAL_HOSTNAME") or ""
+).strip()
+if _PAAS_HOST and _PAAS_HOST not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(_PAAS_HOST)
+
 if not ALLOWED_HOSTS:
     if DEBUG:
         ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
@@ -45,6 +55,11 @@ if not ALLOWED_HOSTS:
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
 ]
+# Mirror the auto-detected PaaS host into CSRF trusted origins (always HTTPS).
+if _PAAS_HOST:
+    _paas_origin = f"https://{_PAAS_HOST}"
+    if _paas_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_paas_origin)
 
 # Respect the proxy's forwarded scheme so request.is_secure() / CSRF / SSL redirect
 # work behind a TLS-terminating load balancer (Render, Fly, etc.). Trustworthy ONLY
