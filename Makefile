@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install run migrate makemigrations test lint fmt collectstatic shell hooks hooks-run docker-build docker-run clean
+.PHONY: help install run migrate makemigrations test lint fmt collectstatic shell hooks hooks-run docker-build docker-run docker-build-dev docker-dev clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -42,6 +42,15 @@ docker-build: ## Build the production image
 
 docker-run: ## Run the production image on :8000
 	docker run --rm --name collabstr-brief -p 8000:8000 --env-file .env collabstr-brief
+
+docker-build-dev: ## Build the dev image (live code reload)
+	docker build -f Dockerfile.dev -t collabstr-brief-dev .
+
+docker-dev: ## Run on :8000 with live code reload (host source bind-mounted)
+	docker run --rm --name collabstr-brief-dev -p 8000:8000 \
+		-e DJANGO_DEBUG=true \
+		-v "$(CURDIR)":/app -v /app/.venv \
+		collabstr-brief-dev
 
 clean: ## Remove venv, caches, sqlite db, collected static
 	rm -rf .venv staticfiles db.sqlite3

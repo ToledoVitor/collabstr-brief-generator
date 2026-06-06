@@ -35,3 +35,11 @@ services:
       # Paste your key when Render prompts at apply (kept out of git).
       - key: OPENAI_API_KEY
         sync: false
+      # ── Langfuse (LLM observability) — optional. Tracing is a no-op unless both
+      # keys are set, so leaving these blank is a safe keyless deploy.
+      - key: LANGFUSE_BASE_URL
+        value: "https://us.cloud.langfuse.com"
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false

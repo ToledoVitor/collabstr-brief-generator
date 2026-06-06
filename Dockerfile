@@ -20,7 +20,11 @@ COPY . .
 
 # Collect static at build time (whitenoise serves them in production).
 # --no-dev keeps the runtime image free of dev tooling (ruff, pre-commit).
-RUN uv run --no-dev python manage.py collectstatic --noinput
+# DJANGO_DEBUG=true is set ONLY for this build step: real env vars (SECRET_KEY,
+# ALLOWED_HOSTS) don't exist at build time, and prod settings fail closed without
+# them. collectstatic just copies files, so the dev fallback is safe here; the
+# runtime CMD below runs with the real DEBUG=false environment.
+RUN DJANGO_DEBUG=true uv run --no-dev python manage.py collectstatic --noinput
 
 EXPOSE 8000
 

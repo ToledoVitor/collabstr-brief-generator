@@ -1,0 +1,31 @@
+# Dev image: live code reload. Unlike the prod Dockerfile (which bakes the code
+# in and serves with gunicorn), this image installs ONLY the dependencies — the
+# source is bind-mounted at runtime (see `make docker-dev`). Edits on the host
+# are picked up instantly by Django's autoreloading runserver; no rebuild.
+#
+# Same pinned base + uv as prod so the dev runtime matches production.
+FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203
+
+COPY --from=ghcr.io/astral-sh/uv:0.8.11@sha256:8101ad825250a114e7bef89eefaa73c31e34e10ffbe5aff01562740bac97553c /uv /usr/local/bin/uv
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_LINK_MODE=copy \
+    # Never touch the lockfile at runtime — the env is prebuilt below.
+    UV_FROZEN=1 \
+    # Build + keep the virtualenv OUTSIDE /app. The bind mount lands on /app and
+    # would otherwise shadow .venv with the host's (macOS-built) one.
+    UV_PROJECT_ENVIRONMENT=/opt/venv
+
+WORKDIR /app
+
+# Install all deps (incl. dev tooling: ruff, pre-commit) from the lockfile so
+# `uv run ruff`/`make test` work inside the container too. Cached on lock change.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen
+
+EXPOSE 8000
+
+# Apply migrations (creates the SQLite cost ledger if absent), then run Django's
+# autoreloading dev server on all interfaces. DEBUG is passed in at `docker run`.
+CMD ["sh", "-c", "uv run python manage.py migrate --noinput && uv run python manage.py runserver 0.0.0.0:8000"]

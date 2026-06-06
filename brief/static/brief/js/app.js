@@ -64,7 +64,7 @@
   function setButtonLoading(isLoading) {
     var $btn = $("#submit-btn");
     $btn.prop("disabled", isLoading).toggleClass("is-loading", isLoading);
-    $btn.find(".btn__label").text(isLoading ? "Generating…" : "Generate brief");
+    $btn.find(".btn__label").text(isLoading ? "Generating…" : "Generate new brief");
     $("#regenerate-btn, #share-btn").prop("disabled", isLoading);
   }
 
@@ -110,12 +110,25 @@
       /* storage full / disabled — history is best-effort */
     }
   }
-  function rememberRun(entry) {
+  // A freshly generated run: goes to the top, stamped now ("just now").
+  function recordNewRun(entry) {
     var runs = loadRuns().filter(function (r) {
       return r.id !== entry.id;
     });
     runs.unshift(entry);
     saveRuns(runs);
+    renderRuns(entry.id);
+  }
+
+  // Opening an existing run is a read, not a re-run: leave its timestamp and
+  // position untouched. Only add it (using the server's real created_at, not
+  // "now") if this browser hasn't seen it — e.g. a shared link on a fresh device.
+  function ensureRun(entry) {
+    var runs = loadRuns();
+    if (!runs.some(function (r) { return r.id === entry.id; })) {
+      runs.unshift(entry);
+      saveRuns(runs);
+    }
     renderRuns(entry.id);
   }
 
@@ -237,7 +250,7 @@
       .done(function (data) {
         renderResult(data);
         if (data.id) {
-          rememberRun(historyEntry(data.id, inputs, Date.now()));
+          recordNewRun(historyEntry(data.id, inputs, Date.now()));
           setUrlRun(data.id);
         }
       })
@@ -265,8 +278,10 @@
           lastInputs = data.inputs;
         }
         renderResult(data);
-        // Make sure it's in this browser's history (e.g. opened via a shared link).
-        rememberRun(historyEntry(data.id, data.inputs, Date.now()));
+        // Opening, not generating: keep the original age (server created_at),
+        // and don't bump position. Only adds it if unseen (e.g. a shared link).
+        var createdTs = data.created_at ? new Date(data.created_at).getTime() : Date.now();
+        ensureRun(historyEntry(data.id, data.inputs, createdTs));
         setUrlRun(data.id);
       })
       .fail(function (xhr) {

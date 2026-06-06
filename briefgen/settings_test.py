@@ -22,6 +22,12 @@ os.environ["LLM_MODEL"] = "test-model"
 os.environ.pop("OPENAI_API_KEY", None)
 os.environ.pop("ANTHROPIC_API_KEY", None)
 
+# Disable Langfuse tracing so the suite never imports the SDK or emits a network
+# span. Strip credentials AND force the off flag (belt and suspenders).
+os.environ["LANGFUSE_TRACING"] = "false"
+os.environ.pop("LANGFUSE_PUBLIC_KEY", None)
+os.environ.pop("LANGFUSE_SECRET_KEY", None)
+
 # Django security settings fail closed in prod (DEBUG off → SECRET_KEY/ALLOWED_HOSTS
 # required, SSL redirect on). Pin a dev-like posture for the offline suite so importing
 # settings doesn't raise and the test client (host "testserver") isn't redirected to

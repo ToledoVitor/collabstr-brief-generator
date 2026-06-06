@@ -10,6 +10,7 @@ import os
 import time
 
 from brief.schemas import BRIEF_OUTPUT_SCHEMA, BriefRequest, BriefResult
+from brief.services.observability import current_trace_id, observe_generation
 from brief.services.providers import LLMProvider, build_provider
 from brief.services.telemetry import estimate_cost
 
@@ -63,18 +64,49 @@ def generate_brief(
     """Return (validated result, telemetry dict). `provider` is injectable for tests."""
     provider = provider or build_provider()
 
-    started = time.perf_counter()
-    raw = provider.generate(
-        SYSTEM_PROMPT,
-        _user_prompt(req),
-        BRIEF_OUTPUT_SCHEMA,
-        temperature=_temperature(),
-        max_tokens=_max_tokens(),
-    )
-    latency_ms = int((time.perf_counter() - started) * 1000)
+    inputs = {
+        "brand": req.brand,
+        "platform": req.platform.value,
+        "goal": req.goal.value,
+        "tone": req.tone.value,
+    }
 
-    # Trust nothing: validate the model output against our schema.
-    result = BriefResult.model_validate(raw.data)
+    # Wrap the call as a Langfuse generation (no-op unless LANGFUSE_* is set).
+    started = time.perf_counter()
+    trace_id = None
+    with observe_generation(
+        name="generate_brief",
+        model=os.getenv("LLM_MODEL") or None,
+        input={"system": SYSTEM_PROMPT, "user": _user_prompt(req)},
+        metadata=inputs,
+    ) as gen:
+        raw = provider.generate(
+            SYSTEM_PROMPT,
+            _user_prompt(req),
+            BRIEF_OUTPUT_SCHEMA,
+            temperature=_temperature(),
+            max_tokens=_max_tokens(),
+        )
+        latency_ms = int((time.perf_counter() - started) * 1000)
+
+        # Trust nothing: validate the model output against our schema.
+        result = BriefResult.model_validate(raw.data)
+        cost_usd = estimate_cost(raw.model, raw.input_tokens, raw.output_tokens)
+
+        if gen is not None:
+            # Attach the resolved model, token usage and cost to the trace.
+            gen.update(
+                output=result.model_dump(),
+                model=raw.model,
+                usage_details={
+                    "input": raw.input_tokens,
+                    "output": raw.output_tokens,
+                    "total": raw.input_tokens + raw.output_tokens,
+                },
+                cost_details={"total": cost_usd},
+                metadata={**inputs, "provider": raw.provider},
+            )
+            trace_id = current_trace_id()
 
     telemetry = {
         "provider": raw.provider,
@@ -83,6 +115,10 @@ def generate_brief(
         "input_tokens": raw.input_tokens,
         "output_tokens": raw.output_tokens,
         "total_tokens": raw.input_tokens + raw.output_tokens,
-        "cost_usd": estimate_cost(raw.model, raw.input_tokens, raw.output_tokens),
+        "cost_usd": cost_usd,
     }
+
+    if trace_id:
+        telemetry["langfuse_trace_id"] = trace_id
+
     return result, telemetry

@@ -1,11 +1,11 @@
 # Collabstr — AI Brief Generator
 
-A tiny, production-minded AI feature: from four inputs (brand, platform, goal, tone)
-it generates a **campaign brief** — a short brief, 3–4 creative angles, and 3–5
-success criteria — with **live latency / token / cost telemetry**.
+**Four inputs → a ready-to-send campaign brief, with live token / latency / cost telemetry.**
 
-Django + a provider-agnostic LLM layer (OpenAI · Anthropic · offline `fake`) and a
-clean single-page jQuery front end.
+Type a brand, pick a platform, goal, and tone; get back a short brief, 3–4 creative
+angles, and 3–5 measurable success criteria. Behind it: Django, a provider-agnostic
+LLM layer (OpenAI · Anthropic · offline `fake`), and a single jQuery page styled from
+Collabstr's own design tokens. Built in about an hour.
 
 ## Live demo
 
@@ -29,6 +29,53 @@ Use a real model: `cp .env.example .env`, then set `LLM_PROVIDER` (`anthropic` |
 
 `make help` lists them all — `install`, `run`, `migrate`, `test`, `lint`, `fmt`,
 `collectstatic`, `docker-build`, `docker-run`, `clean`.
+
+## Developing process
+
+Built in one session with Claude Code — four commits over ~30 minutes
+([history](https://github.com/ToledoVitor/collabstr-brief-generator/commits/main)).
+The order was on purpose: prove the risky parts first, polish second, deploy last.
+
+1. **Vertical slice before polish.** Form → endpoint → model → rendered brief, working
+   end to end in the first commit. I wanted structured output and telemetry proven
+   before spending a minute on CSS.
+
+2. **An offline `fake` provider.** The app and the *whole* test suite run with no API
+   key. The LLM layer is a Protocol with three implementations (OpenAI · Anthropic ·
+   `fake`), chosen by an env var; `fake` returns a fixed brief. So `make run` and
+   `make test` need zero setup, CI never needs a secret, and tests inject
+   `FakeProvider()` directly. This one decision shaped the rest of the layering.
+
+3. **Force structure, then distrust it.** The model can only answer through a function
+   call (`emit_brief`) whose parameters are a JSON Schema — I get JSON, not prose to
+   parse. But I don't trust that JSON either: it's re-validated with Pydantic before
+   the view sees it, so malformed output becomes a clean 502 instead of a half-rendered
+   page.
+
+4. **A prompt that's short, specific, and clamped.** One system prompt: the role
+   (Collabstr strategist), the platforms, hard style rules (no hype, emojis, or
+   hashtags), and the exact fields to emit. The user prompt is just the four inputs.
+   Temperature defaults to 0.3 and is clamped to ≤0.5 *in code*, so an env override
+   can't push it higher.
+
+5. **One home per decision, so nothing drifts.** Guardrail clamps live only in
+   `llm.py`; SDK quirks only in `providers.py`; the input allowlist is the `schemas.py`
+   enums — which also generate the form's dropdown options, so the UI and the
+   server-side validation can never disagree. Adding a tone is a one-line enum edit.
+
+6. **Went past the brief on purpose.** Persistence wasn't required, but telemetry that
+   vanishes on refresh felt half-finished. So every run is logged to a small SQLite
+   cost/latency ledger and gets an unguessable share link (`?run=<id>`). Deploy came
+   last: a hardened `--no-dev` image, then Railway with a volume so the ledger survives
+   redeploys.
+
+**How tokens and latency are measured.** Tokens come straight from each provider's own
+`usage` (prompt/completion counts) — not estimated; the `fake` provider approximates at
+~4 chars/token so the numbers still move offline. Latency is wall-clock
+`time.perf_counter()` wrapped around the provider call only, in
+[`llm.py`](brief/services/llm.py). Cost is `tokens × per-model price` from a small table
+in [`telemetry.py`](brief/services/telemetry.py). All three ride back in the response
+JSON and render as chips in the UI.
 
 ## How it works
 
