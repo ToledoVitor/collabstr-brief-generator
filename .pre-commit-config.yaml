@@ -1,10 +1,5 @@
 # Pre-commit hooks for the AI Brief Generator.
 #
-# One-time setup (this repo is not yet a git repo — init first if needed):
-#   git init                         # only if .git doesn't exist yet
-#   uv add --dev pre-commit          # already in pyproject dev deps
-#   uv run pre-commit install        # wire the git pre-commit hook
-#
 # Run against everything on demand:
 #   uv run pre-commit run --all-files
 #

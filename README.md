@@ -7,6 +7,12 @@ success criteria — with **live latency / token / cost telemetry**.
 Django + a provider-agnostic LLM layer (OpenAI · Anthropic · offline `fake`) and a
 clean single-page jQuery front end.
 
+## Live demo
+
+- **App:** <!-- LIVE_URL --> _deploying…_ (`https://collabstr-brief-generator.onrender.com`)
+- **Loom (< 1 min):** <!-- LOOM_URL --> _coming soon_
+- **Styleguide:** `/styleguide` — living design-system reference
+
 ## Quickstart
 
 ```bash
