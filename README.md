@@ -129,32 +129,39 @@ pink `#FF899B` + the signature pink→purple gradient · 8px radius).
 
 ## Deploy
 
-`Dockerfile` (uv image; migrate + gunicorn + whitenoise) + `railway.json` + `render.yaml`.
+Containerized (`Dockerfile`: uv image, migrate + gunicorn + whitenoise) with a
+`railway.json` for setup. Running live on **Railway**.
 
-### Railway (recommended — persists data via a volume)
-
-1. **New Project → Deploy from GitHub repo** → pick this repo. Railway builds the Dockerfile.
-2. **Add a Volume** mounted at `/data` (so the SQLite cost ledger + share links survive redeploys).
-3. **Settings → Networking → Generate Domain** → note the URL.
-4. **Variables** — set:
+1. **New Project → Deploy from GitHub repo** → pick this repo (it builds the Dockerfile).
+2. **Add a Volume** mounted at `/data` — the SQLite cost ledger and the shareable
+   run links live here, so they survive redeploys.
+3. **Settings → Networking → Generate Domain.**
+4. **Variables** — the host and CSRF origin are read automatically from Railway's
+   `RAILWAY_PUBLIC_DOMAIN`, so you only need:
    ```
    DJANGO_DEBUG=false
    DJANGO_SECRET_KEY=<long random string>
-   DJANGO_ALLOWED_HOSTS=<your-domain>.up.railway.app
-   DJANGO_CSRF_TRUSTED_ORIGINS=https://<your-domain>.up.railway.app
    DJANGO_DB_PATH=/data/db.sqlite3
    LLM_PROVIDER=openai
    LLM_MODEL=gpt-5-mini
    OPENAI_API_KEY=<your key>
    ```
-5. Redeploy. The start command migrates (creating the DB on the volume) then serves.
+5. Deploy. The start command migrates (creating the DB on the volume) then serves.
 
-Keep **1 replica** (SQLite is single-writer). For multi-replica scale, switch to Postgres.
+Keep **1 replica** (SQLite is single-writer); switch to Postgres to scale out.
+Keyless demo: set `LLM_PROVIDER=fake` for deterministic output with no key.
 
-### Render (alt — blueprint)
+## A note on how this was built
 
-**New → Blueprint →** pick repo **→ Apply**. `render.yaml` is wired for OpenAI and prompts
-for `OPENAI_API_KEY` + `DJANGO_CSRF_TRUSTED_ORIGINS` at apply. Free tier has no persistent
-disk, so the ledger/share links reset on redeploy unless you add a paid disk.
+Quick bit of honesty: I built this with Claude Code (Opus 4.8) doing most of the
+typing while I drove. Start to finish it was about **1h10** — a little over the
+one-hour target in the brief, but I'd rather hand over a clean, tested slice than
+rush it.
 
-**Keyless demo** on either host: set `LLM_PROVIDER=fake` — deterministic output, no key.
+A word on hosting, since the brief leaves it open: I went with Railway over Render,
+mostly for persistence. The app keeps a small SQLite ledger and every brief gets a
+shareable link that replays the exact run, so I wanted that data to stick around.
+Railway lets you mount a volume and put SQLite on it, so runs survive redeploys.
+Render's free tier also sleeps when idle (a cold start every time someone opens a
+shared link), and Railway's trial credit avoids that. I'd been meaning to try
+Railway anyway, so this was a good excuse.
