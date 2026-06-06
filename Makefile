@@ -25,8 +25,8 @@ lint: ## Lint with ruff
 fmt: ## Format with ruff
 	uv run ruff format .
 
-hooks: ## Install the git pre-commit hooks
-	uv run pre-commit install
+hooks: ## Install the git pre-commit + pre-push hooks
+	uv run pre-commit install --hook-type pre-commit --hook-type pre-push
 
 hooks-run: ## Run all pre-commit hooks against every file
 	uv run pre-commit run --all-files

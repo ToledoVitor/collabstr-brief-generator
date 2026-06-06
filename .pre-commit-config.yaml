@@ -8,6 +8,10 @@
 default_language_version:
   python: python3.12
 
+# Fast checks gate every commit; the slower test suite gates pushes only
+# (see the django-tests hook's `stages:`). Override per-hook as needed.
+default_stages: [pre-commit]
+
 repos:
   # --- Overall code hygiene (generic, no project deps needed) ---------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -61,11 +65,12 @@ repos:
         always_run: true
 
       # Run the test suite (offline, fake provider, no API key — matches `make
-      # test`). Tests on every commit can get slow; move this hook's `stages:`
-      # to [pre-push] if you'd rather gate on push than on commit.
+      # test`). Gated on pre-push, not pre-commit, so commits stay fast; the
+      # full suite runs once before each push instead of on every commit.
       - id: django-tests
         name: django test suite (offline)
         entry: uv run python manage.py test --settings=briefgen.settings_test
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-push]

@@ -191,3 +191,41 @@ class EndpointErrorPathTests(TestCase):
         resp = self.client.post(self.url, data="{not valid json", content_type="application/json")
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json()["error"], "invalid_json")
+
+
+class SharedRunTests(TestCase):
+    """Server-backed shareable links: create returns an id; GET replays the run."""
+
+    def setUp(self):
+        cache.clear()
+        os.environ["LLM_PROVIDER"] = "fake"
+
+    def _create(self):
+        return self.client.post(
+            reverse("create_brief"), data=json.dumps(VALID), content_type="application/json"
+        )
+
+    def test_create_returns_id_and_persists_result(self):
+        body = self._create().json()
+        self.assertIn("id", body)
+        self.assertTrue(body["id"])
+        row = BriefRequestLog.objects.get(public_id=body["id"])
+        # the generated brief is stored, not just telemetry
+        self.assertEqual(row.result["brief"], body["result"]["brief"])
+        self.assertEqual(len(row.result["angles"]), len(body["result"]["angles"]))
+
+    def test_get_brief_replays_stored_run(self):
+        created = self._create().json()
+        resp = self.client.get(reverse("get_brief", args=[created["id"]]))
+        self.assertEqual(resp.status_code, 200)
+        body = resp.json()
+        self.assertEqual(body["id"], created["id"])
+        self.assertEqual(body["result"], created["result"])
+        self.assertEqual(body["inputs"]["brand"], VALID["brand"])
+        for key in ("provider", "model", "total_tokens", "cost_usd"):
+            self.assertIn(key, body["telemetry"])
+
+    def test_get_unknown_run_returns_404(self):
+        resp = self.client.get(reverse("get_brief", args=["does-not-exist"]))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.json()["error"], "not_found")

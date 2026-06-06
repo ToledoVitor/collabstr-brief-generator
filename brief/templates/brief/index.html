@@ -3,66 +3,100 @@
 
 {% block title %}AI Brief Generator · Collabstr{% endblock %}
 {% block description %}Turn four quick inputs into a ready-to-send campaign brief.{% endblock %}
+{% block body_class %}app-page{% endblock %}
 
 {% block content %}
-<section class="hero">
+<section class="hero hero--compact">
   <h1 class="hero__title">AI Brief Generator</h1>
   <p class="hero__sub">Turn four quick inputs into a ready-to-send campaign brief for your next creator collab.</p>
 </section>
 
-<div class="grid">
-  <!-- Input card -->
-  <section class="card">
-    <form id="brief-form" novalidate>
-      {% include "components/field.html" with id="brand" label="Brand name" type="text" placeholder="e.g. Aera Skincare" required=True %}
-
-      <div class="field-row">
-        {% include "components/field.html" with id="platform" label="Platform" type="select" options=platforms %}
-        {% include "components/field.html" with id="goal" label="Goal" type="select" options=goals %}
-        {% include "components/field.html" with id="tone" label="Tone" type="select" options=tones %}
-      </div>
-
-      <button type="submit" id="submit-btn" class="btn btn--primary btn--block">
-        <span class="btn__label">Generate brief</span>
-        <span class="spinner" aria-hidden="true"></span>
-      </button>
-    </form>
-
-    <div id="error" class="banner banner--error" hidden></div>
-  </section>
-
-  <!-- Results -->
-  <section id="results" class="results" hidden aria-live="polite">
-    <div class="results__head">
-      <h2 class="results__title">Campaign brief</h2>
-      <div class="results__actions">
-        <button type="button" id="regenerate-btn" class="btn btn--ghost btn--sm">Regenerate</button>
-      </div>
+<div class="app-layout">
+  <!-- Recent runs sidebar (persisted in localStorage; each links to a shareable run) -->
+  <aside class="runs" aria-label="Recent runs">
+    <div class="runs__head">
+      <h2 class="runs__title">Recent runs</h2>
+      <button type="button" id="clear-runs" class="link-btn" hidden>Clear</button>
     </div>
+    <ul id="runs-list" class="runs__list"></ul>
+    <p id="runs-empty" class="runs__empty">No runs yet. Generate a brief — it lands here, and every run has a shareable link.</p>
+  </aside>
 
-    <div id="telemetry" class="chips"></div>
+  <div class="app-main">
+    <!-- Input card -->
+    <section class="card">
+      <form id="brief-form" novalidate>
+        {% include "components/field.html" with id="brand" label="Brand name" type="text" placeholder="e.g. Aera Skincare" required=True %}
 
-    <article class="block">
-      <div class="block__head">
-        <h3>Brief</h3>
-        <button type="button" class="copy" data-copy-target="#brief-text">Copy</button>
+        <div class="field-row">
+          {% include "components/field.html" with id="platform" label="Platform" type="select" options=platforms %}
+          {% include "components/field.html" with id="goal" label="Goal" type="select" options=goals %}
+          {% include "components/field.html" with id="tone" label="Tone" type="select" options=tones %}
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn btn--primary btn--block">
+          <span class="btn__label">Generate brief</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <div id="error" class="banner banner--error" hidden></div>
+    </section>
+
+    <!-- Loading skeleton (shown while the model is working) -->
+    <section id="loading" class="results loading" hidden aria-live="polite">
+      <div class="loading__status">
+        <span class="spinner spinner--dark" aria-hidden="true"></span>
+        <span id="loading-text" class="loading__text">Sending your brief…</span>
+        <span id="loading-timer" class="loading__timer">0.0s</span>
       </div>
-      <p id="brief-text" class="editable" contenteditable="true"></p>
-    </article>
-
-    <article class="block">
-      <div class="block__head">
-        <h3>Creative angles</h3>
-        <span class="hint">Tap any text to edit</span>
+      <div class="skeleton skeleton--title"></div>
+      <div class="skeleton-block">
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--line short"></div>
       </div>
-      <div id="angles" class="angles"></div>
-    </article>
+      <div class="skeleton-grid">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </section>
 
-    <article class="block">
-      <div class="block__head"><h3>Success criteria</h3></div>
-      <ul id="criteria" class="criteria"></ul>
-    </article>
-  </section>
+    <!-- Results -->
+    <section id="results" class="results" hidden aria-live="polite">
+      <div class="results__head">
+        <h2 class="results__title">Campaign brief</h2>
+        <div class="results__actions">
+          <button type="button" id="share-btn" class="btn btn--ghost btn--sm" hidden>Share</button>
+          <button type="button" id="regenerate-btn" class="btn btn--ghost btn--sm">Regenerate</button>
+        </div>
+      </div>
+
+      <div id="telemetry" class="chips"></div>
+
+      <article class="block">
+        <div class="block__head">
+          <h3>Brief</h3>
+          <button type="button" class="copy" data-copy-target="#brief-text">Copy</button>
+        </div>
+        <p id="brief-text" class="editable" contenteditable="true"></p>
+      </article>
+
+      <article class="block">
+        <div class="block__head">
+          <h3>Creative angles</h3>
+          <span class="hint">Tap any text to edit</span>
+        </div>
+        <div id="angles" class="angles"></div>
+      </article>
+
+      <article class="block">
+        <div class="block__head"><h3>Success criteria</h3></div>
+        <ul id="criteria" class="criteria"></ul>
+      </article>
+    </section>
+  </div>
 </div>
 {% endblock %}
 

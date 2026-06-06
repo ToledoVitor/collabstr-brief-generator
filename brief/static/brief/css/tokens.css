@@ -61,4 +61,5 @@
 
   /* Layout */
   --container: 760px;
+  --container-wide: 1080px;   /* two-column app screens (form + runs sidebar) */
 }

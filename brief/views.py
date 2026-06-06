@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 
 from django.http import HttpRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from pydantic import ValidationError
 
 from brief.models import BriefRequestLog
@@ -91,13 +92,15 @@ def create_brief(request: HttpRequest):
             status=502,
         )
 
-    # 6) Persist the cost/latency ledger row.
-    BriefRequestLog.objects.create(
+    # 6) Persist the cost/latency ledger row (stores the result for shareable replay).
+    result_data = result.model_dump()
+    log = BriefRequestLog.objects.create(
         brand=brief_request.brand,
         platform=brief_request.platform.value,
         goal=brief_request.goal.value,
         tone=brief_request.tone.value,
         client_ip=client_ip,
+        result=result_data,
         **{
             k: telemetry[k]
             for k in (
@@ -112,20 +115,80 @@ def create_brief(request: HttpRequest):
     )
 
     logger.info(
-        "brief ok provider=%s model=%s latency_ms=%s tokens=%s cost_usd=%s",
+        "brief ok id=%s provider=%s model=%s latency_ms=%s tokens=%s cost_usd=%s",
+        log.public_id,
         telemetry["provider"],
         telemetry["model"],
         telemetry["latency_ms"],
         telemetry["total_tokens"],
         telemetry["cost_usd"],
     )
-    return JsonResponse({"result": result.model_dump(), "telemetry": telemetry})
+    return JsonResponse({"id": log.public_id, "result": result_data, "telemetry": telemetry})
+
+
+@require_GET
+def get_brief(request: HttpRequest, public_id: str):
+    """Replay a stored run by its public id — backs shareable links and history.
+
+    Returns the same {id, result, telemetry} shape as create_brief, plus the
+    original inputs so the form can be repopulated.
+    """
+    try:
+        log = BriefRequestLog.objects.get(public_id=public_id)
+    except BriefRequestLog.DoesNotExist:
+        return JsonResponse(
+            {"error": "not_found", "detail": "That brief link doesn't exist (or expired)."},
+            status=404,
+        )
+
+    telemetry = {
+        "provider": log.provider,
+        "model": log.model,
+        "latency_ms": log.latency_ms,
+        "input_tokens": log.input_tokens,
+        "output_tokens": log.output_tokens,
+        "total_tokens": log.input_tokens + log.output_tokens,
+        "cost_usd": float(log.cost_usd),
+    }
+    return JsonResponse(
+        {
+            "id": log.public_id,
+            "inputs": {
+                "brand": log.brand,
+                "platform": log.platform,
+                "goal": log.goal,
+                "tone": log.tone,
+            },
+            "result": log.result,
+            "telemetry": telemetry,
+            "created_at": log.created_at,
+        }
+    )
+
+
+def _trusted_proxy_count() -> int:
+    """Number of trusted reverse proxies in front of the app (Render = 1).
+
+    Each trusted proxy appends the address it saw to X-Forwarded-For, so the real
+    client is the Nth entry from the right. 0 means no proxy — ignore XFF entirely
+    and trust REMOTE_ADDR.
+    """
+    try:
+        return max(0, int(os.getenv("TRUSTED_PROXY_COUNT", "1")))
+    except ValueError:
+        return 1
 
 
 def _client_ip(request: HttpRequest) -> str:
-    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    """Client IP for rate limiting. Resists X-Forwarded-For spoofing: reads only the
+    hop a trusted proxy appended, not the attacker-controlled leftmost value."""
+    proxies = _trusted_proxy_count()
+    if proxies:
+        parts = [
+            p.strip() for p in request.META.get("HTTP_X_FORWARDED_FOR", "").split(",") if p.strip()
+        ]
+        if parts:
+            return parts[-min(proxies, len(parts))]
     return request.META.get("REMOTE_ADDR", "0.0.0.0")
 
 

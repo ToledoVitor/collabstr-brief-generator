@@ -6,17 +6,17 @@ requires-python = ">=3.12"
 dependencies = [
     "Django>=5.0,<5.2",
     "pydantic>=2,<3",
-    "openai>=1.40",
-    "anthropic>=0.34",
-    "python-dotenv>=1.0",
-    "whitenoise>=6",
-    "gunicorn>=21",
+    "openai>=2,<3",
+    "anthropic>=0.34,<1",
+    "python-dotenv>=1.0,<2",
+    "whitenoise>=6,<7",
+    "gunicorn>=23,<27",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.6",
-    "pre-commit>=4",
+    "ruff>=0.6,<0.16",
+    "pre-commit>=4,<5",
 ]
 
 [tool.uv]

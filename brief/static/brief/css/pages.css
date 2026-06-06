@@ -46,6 +46,62 @@
   display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
 }
 
+/* ── App layout (generator screen) ───────────────────────────────────────── */
+/* Widen the shared container so the form + a runs sidebar sit side by side. */
+.app-page .wrap { max-width: var(--container-wide); }
+.hero--compact { text-align: left; margin-bottom: var(--space-5); }
+.hero--compact .hero__sub { margin-left: 0; }
+
+.app-layout { display: grid; grid-template-columns: 264px 1fr; gap: var(--space-5); align-items: start; }
+.app-main { display: grid; gap: var(--space-5); min-width: 0; }
+
+/* ── Recent runs sidebar ──────────────────────────────────────────────────── */
+.runs {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow);
+  position: sticky; top: var(--space-5);
+}
+.runs__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+.runs__title { font-size: var(--text-sm); font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: .06em; color: var(--periwinkle); margin: 0; }
+.runs__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.runs__empty { font-size: var(--text-sm); color: var(--ink-soft); margin: 2px; line-height: 1.5; }
+
+.run {
+  width: 100%; text-align: left; font: inherit; cursor: pointer;
+  background: transparent; border: 1px solid transparent; border-radius: var(--radius);
+  padding: 9px 10px; display: grid; gap: 3px; transition: background .12s, border-color .12s;
+}
+.run:hover { background: var(--surface-2); }
+.run.is-active { background: rgba(255, 137, 155, .1); border-color: rgba(255, 137, 155, .4); }
+.run__brand { font-weight: var(--weight-semibold); font-size: var(--text-base); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.run__meta { font-size: var(--text-xs); color: var(--ink-soft); }
+.run__meta .dot { opacity: .5; margin: 0 2px; }
+
+.link-btn {
+  background: none; border: none; color: var(--pink-strong); font: inherit;
+  font-size: var(--text-xs); font-weight: var(--weight-semibold); cursor: pointer;
+  padding: 2px 5px; border-radius: 6px;
+}
+.link-btn:hover { background: rgba(255, 137, 155, .14); }
+
+/* ── Loading / skeleton (while the model works) ───────────────────────────── */
+.loading__status { display: flex; align-items: center; gap: 10px; margin-bottom: var(--space-5); }
+.loading__text { font-weight: var(--weight-medium); color: var(--ink); font-size: 15px; }
+.loading__timer { margin-left: auto; font-variant-numeric: tabular-nums; font-size: var(--text-sm); color: var(--ink-soft); }
+.skeleton--title { height: 20px; width: 150px; margin-bottom: 20px; }
+.skeleton-block { display: grid; gap: 11px; margin-bottom: 24px; }
+.skeleton--line { height: 13px; }
+.skeleton--line.short { width: 55%; }
+.skeleton-grid { display: grid; gap: var(--space-3); }
+.skeleton-card { height: 62px; border-radius: var(--radius); }
+
+/* Sidebar drops below the form on narrow screens. */
+@media (max-width: 880px) {
+  .app-layout { grid-template-columns: 1fr; }
+  .app-main { order: 1; }
+  .runs { order: 2; position: static; }
+}
+
 @media (max-width: 560px) {
   .hero__title { font-size: 28px; }
 }

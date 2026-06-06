@@ -1,7 +1,9 @@
-FROM python:3.12-slim
+# Pinned by digest for reproducible builds. Bump periodically for base-OS CVEs:
+#   docker manifest inspect python:3.12-slim | grep digest
+FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203
 
-# uv for dependency management (copied from the official image).
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# uv for dependency management (copied from the official image), version-pinned.
+COPY --from=ghcr.io/astral-sh/uv:0.8.11@sha256:8101ad825250a114e7bef89eefaa73c31e34e10ffbe5aff01562740bac97553c /uv /usr/local/bin/uv
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

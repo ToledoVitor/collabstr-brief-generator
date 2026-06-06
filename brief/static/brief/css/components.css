@@ -79,6 +79,25 @@ select {
 .is-loading .spinner { display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Dark spinner: stands alone on a light surface (e.g. the loading status row). */
+.spinner--dark {
+  display: inline-block;
+  border-color: rgba(120, 120, 170, .25); border-top-color: var(--pink-strong);
+}
+
+/* ── Skeleton (shimmer placeholder while content loads) ───────────────────── */
+.skeleton { position: relative; overflow: hidden; background: var(--surface-2); border-radius: 6px; }
+.skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .65), transparent);
+  animation: shimmer 1.3s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after { animation: none; }
+  .spinner, .spinner--dark { animation: none; }
+}
+
 /* ── Banners ──────────────────────────────────────────────────────────────── */
 .banner { padding: 11px 14px; border-radius: var(--radius); font-size: var(--text-base); }
 .banner--error   { background: var(--danger-bg); color: var(--danger); }

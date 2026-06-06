@@ -82,16 +82,32 @@ pink `#FF899B` + the signature pink→purple gradient · 8px radius).
 
 ## Deploy
 
-`Dockerfile` + `render.yaml` included (uv-based image; migrate + gunicorn + whitenoise).
+`Dockerfile` (uv image; migrate + gunicorn + whitenoise) + `railway.json` + `render.yaml`.
 
-On [Render](https://render.com): **New → Blueprint →** pick this repo **→ Apply**.
-The blueprint is set up for a real **OpenAI** demo, so Render prompts for two
-`sync: false` values at apply time:
+### Railway (recommended — persists data via a volume)
 
-- `OPENAI_API_KEY` — your key (kept out of git)
-- `DJANGO_CSRF_TRUSTED_ORIGINS` — set to the full URL after the first deploy,
-  e.g. `https://collabstr-brief-generator.onrender.com`
+1. **New Project → Deploy from GitHub repo** → pick this repo. Railway builds the Dockerfile.
+2. **Add a Volume** mounted at `/data` (so the SQLite cost ledger + share links survive redeploys).
+3. **Settings → Networking → Generate Domain** → note the URL.
+4. **Variables** — set:
+   ```
+   DJANGO_DEBUG=false
+   DJANGO_SECRET_KEY=<long random string>
+   DJANGO_ALLOWED_HOSTS=<your-domain>.up.railway.app
+   DJANGO_CSRF_TRUSTED_ORIGINS=https://<your-domain>.up.railway.app
+   DJANGO_DB_PATH=/data/db.sqlite3
+   LLM_PROVIDER=openai
+   LLM_MODEL=gpt-5-mini
+   OPENAI_API_KEY=<your key>
+   ```
+5. Redeploy. The start command migrates (creating the DB on the volume) then serves.
 
-For a **keyless** demo instead, set `LLM_PROVIDER=fake` in the dashboard — the
-page then runs with deterministic sample output and no key. Any Docker host
-(Fly.io, Railway, Cloud Run) works the same way.
+Keep **1 replica** (SQLite is single-writer). For multi-replica scale, switch to Postgres.
+
+### Render (alt — blueprint)
+
+**New → Blueprint →** pick repo **→ Apply**. `render.yaml` is wired for OpenAI and prompts
+for `OPENAI_API_KEY` + `DJANGO_CSRF_TRUSTED_ORIGINS` at apply. Free tier has no persistent
+disk, so the ledger/share links reset on redeploy unless you add a paid disk.
+
+**Keyless demo** on either host: set `LLM_PROVIDER=fake` — deterministic output, no key.

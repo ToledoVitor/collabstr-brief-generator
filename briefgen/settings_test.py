@@ -22,6 +22,14 @@ os.environ["LLM_MODEL"] = "test-model"
 os.environ.pop("OPENAI_API_KEY", None)
 os.environ.pop("ANTHROPIC_API_KEY", None)
 
+# Django security settings fail closed in prod (DEBUG off → SECRET_KEY/ALLOWED_HOSTS
+# required, SSL redirect on). Pin a dev-like posture for the offline suite so importing
+# settings doesn't raise and the test client (host "testserver") isn't redirected to
+# https. setdefault so an explicit ambient value still wins.
+os.environ.setdefault("DJANGO_DEBUG", "true")
+os.environ.setdefault("DJANGO_SECRET_KEY", "test-only-not-a-real-secret")
+os.environ.setdefault("DJANGO_ALLOWED_HOSTS", "testserver,localhost,127.0.0.1")
+
 from .settings import *  # noqa: E402,F401,F403
 
 # 2a) Drop WhiteNoise: it's a production static-file concern and emits a

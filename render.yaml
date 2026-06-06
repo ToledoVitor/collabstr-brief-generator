@@ -14,12 +14,20 @@ services:
         value: "false"
       - key: DJANGO_SECRET_KEY
         generateValue: true
+      # Bound to this service's own onrender.com host — no wildcard.
       - key: DJANGO_ALLOWED_HOSTS
-        value: "*"
+        fromService:
+          type: web
+          name: collabstr-brief-generator
+          property: host
       # Set to your full URL after the first deploy, e.g.
       # https://collabstr-brief-generator.onrender.com
       - key: DJANGO_CSRF_TRUSTED_ORIGINS
         sync: false
+      # One proxy hop in front of the app (Render's LB) — lets the app read the real
+      # client IP from X-Forwarded-For for rate limiting without trusting spoofs.
+      - key: TRUSTED_PROXY_COUNT
+        value: "1"
       - key: LLM_PROVIDER
         value: "openai"
       - key: LLM_MODEL
