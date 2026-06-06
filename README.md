@@ -10,7 +10,7 @@ Collabstr's own design tokens. Built in about an hour.
 ## Live demo
 
 - **App:** <!-- LIVE_URL --> **https://collabstr-brief-generator-production.up.railway.app**
-- **Loom (< 1 min):** <!-- LOOM_URL --> _coming soon_
+- **Loom (< 1 min):** <!-- LOOM_URL --> **https://www.loom.com/share/1a4c6b5fe6d9403797a0696be2cd8747**
 - **Styleguide:** [`/styleguide`](https://collabstr-brief-generator-production.up.railway.app/styleguide) — living design-system reference
 
 ## Quickstart
@@ -154,7 +154,7 @@ Keyless demo: set `LLM_PROVIDER=fake` for deterministic output with no key.
 ## A note on how this was built
 
 Quick bit of honesty: I built this with Claude Code (Opus 4.8) doing most of the
-typing while I drove. Start to finish it was about **1h10** — a little over the
+typing while I did home chores. Start to finish it was about **1h10** — a little over the
 one-hour target in the brief, but I'd rather hand over a clean, tested slice than
 rush it.
 
@@ -164,4 +164,5 @@ shareable link that replays the exact run, so I wanted that data to stick around
 Railway lets you mount a volume and put SQLite on it, so runs survive redeploys.
 Render's free tier also sleeps when idle (a cold start every time someone opens a
 shared link), and Railway's trial credit avoids that. I'd been meaning to try
-Railway anyway, so this was a good excuse.
+Railway anyway, so this was a good excuse. And also, I'm using my free trial to
+do that 😉)
