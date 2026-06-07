@@ -32,7 +32,7 @@ Use a real model: `cp .env.example .env`, then set `LLM_PROVIDER` (`anthropic` |
 
 ## Developing process
 
-Built in one session with Claude Code — four commits over ~30 minutes
+Built in one session with Claude Code (Opus 4.8) — about 1h10m
 ([history](https://github.com/ToledoVitor/collabstr-brief-generator/commits/main)).
 The order was on purpose: prove the risky parts first, polish second, deploy last.
 
@@ -166,3 +166,35 @@ Render's free tier also sleeps when idle (a cold start every time someone opens 
 shared link), and Railway's trial credit avoids that. I'd been meaning to try
 Railway anyway, so this was a good excuse. And also, I'm using my free trial to
 do that 😉)
+
+## Possible future improvements
+
+A few things I'd build next if this grew past a take-home:
+
+**Ground the brand in a real company (identify → verify → generate).** Right now the
+model writes from whatever it already "knows" about the brand name you type, which can
+drift or hallucinate for smaller brands. I'd turn that into a small three-stage chain:
+
+1. **Identify** — an agent (ideally with web search or a company-data tool) resolves the
+   typed brand into an actual company: category, audience, products, tone of voice.
+2. **Verify (LLM-as-judge)** — a second model checks that identification against the
+   evidence and returns a confidence score. Low confidence asks the user to confirm the
+   company, or proceeds with a clear "couldn't verify" note, instead of guessing.
+3. **Generate** — the brief is written from the *verified* company facts, not the bare
+   brand string.
+
+It's a solid pattern (enrich → gate → generate), with two honest caveats. The verifier
+is only as good as the evidence it sees, so stage 1 really wants a real source rather
+than the model's memory — otherwise you're checking a hallucination with a hallucination.
+And three calls is roughly 3× the cost and latency, so I'd run cheap models for
+identify/verify and the stronger one only for generation (the provider layer already
+chooses the model per call), cache resolved company profiles in the DB that's already
+there, and keep the telemetry panel honest about the added cost.
+
+A few smaller ones:
+
+- Stream the brief as it's written (Server-Sent Events) for perceived speed.
+- A `/stats` page over the cost ledger: spend over time, p95 latency, popular inputs.
+- Retrieval grounding: pull a few real posts or pricing from the brand's platform and
+  feed them in, so the angles reference what actually works for that creator niche.
+- Regression evals in CI: a golden input set scored by an LLM judge, gating merges.
